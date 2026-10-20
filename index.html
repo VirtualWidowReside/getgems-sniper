@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getgems Price Sniper — Telegram NFT Deal Bot for Windows</title>
+<meta name="description" content="Getgems Price Sniper: a Telegram bot that polls Getgems NFT listings, applies floor-price filters and instantly buys underpriced NFT deals. Free Windows download.">
+<style>
+  :root{
+    --bg-0:#070a1a;
+    --bg-1:#0d1230;
+    --bg-2:#141a3d;
+    --ink:#eef1ff;
+    --muted:#9aa3c7;
+    --line:rgba(140,155,255,.16);
+    --glass:rgba(20,26,61,.55);
+    --accent-1:#6ee7ff;
+    --accent-2:#8b7bff;
+    --accent-3:#ff6ec7;
+    --ok:#4ade80;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(110,231,255,.18), transparent 60%),
+      radial-gradient(1000px 600px at 85% 0%, rgba(139,123,255,.22), transparent 60%),
+      radial-gradient(900px 700px at 50% 110%, rgba(255,110,199,.14), transparent 60%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+    background-attachment:fixed;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    background:var(--glass);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:18px;height:66px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-weight:800;letter-spacing:.3px;font-size:1.02rem;
+  }
+  .brand .dot{
+    width:12px;height:12px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+    box-shadow:0 0 14px rgba(110,231,255,.9);
+  }
+  .brand span.hl{
+    background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:.93rem;color:var(--muted)}
+  .nav-links a{transition:color .18s ease}
+  .nav-links a:hover{color:var(--ink)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    padding:11px 20px;border-radius:11px;font-weight:700;font-size:.92rem;
+    border:1px solid transparent;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+    color:#08102a;
+    box-shadow:0 8px 26px rgba(110,231,255,.28);
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(139,123,255,.42)}
+  .btn-ghost{
+    background:rgba(255,255,255,.03);
+    border-color:var(--line);
+    color:var(--ink);
+  }
+  .btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.07)}
+  .nav-cta{padding:9px 18px;font-size:.87rem}
+
+  /* ---------- HERO ---------- */
+  header.hero{padding:78px 0 38px;text-align:center;position:relative;overflow:hidden}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:7px 15px;border-radius:999px;
+    font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    color:#cdd6ff;
+    background:rgba(139,123,255,.12);
+    border:1px solid rgba(139,123,255,.35);
+    box-shadow:0 0 24px rgba(139,123,255,.18) inset;
+  }
+  .pill .pulse{
+    width:7px;height:7px;border-radius:50%;background:var(--ok);
+    box-shadow:0 0 0 0 rgba(74,222,128,.7);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(74,222,128,.65)}
+    70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}
+    100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}
+  }
+  h1{
+    margin:22px auto 0;max-width:880px;
+    font-size:clamp(2.1rem,5.4vw,3.7rem);
+    line-height:1.1;letter-spacing:-.02em;font-weight:800;
+    background:linear-gradient(100deg,#ffffff 5%,var(--accent-1) 42%,var(--accent-2) 72%,var(--accent-3) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero p.lead{
+    max-width:640px;margin:20px auto 0;color:var(--muted);font-size:1.06rem;
+  }
+  .hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:32px}
+  .hero-actions .btn{padding:14px 26px;font-size:.98rem;border-radius:12px}
+  .stats{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;max-width:820px;margin:46px auto 0;
+  }
+  .chip{
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    border-radius:14px;padding:16px 12px;
+    backdrop-filter:blur(6px);
+  }
+  .chip .v{font-weight:800;font-size:1.06rem;letter-spacing:.2px}
+  .chip .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);margin-top:3px}
+  .chip .v.grad{
+    background:linear-gradient(90deg,var(--accent-1),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* ---------- SECTION HEADS ---------- */
+  section{padding:64px 0}
+  .sec-head{text-align:center;max-width:620px;margin:0 auto 40px}
+  .sec-head .eyebrow{
+    font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent-1);font-weight:700;
+  }
+  .sec-head h2{
+    margin:10px 0 8px;font-size:clamp(1.55rem,3.2vw,2.15rem);
+    letter-spacing:-.01em;font-weight:800;
+  }
+  .sec-head p{margin:0;color:var(--muted);font-size:.98rem}
+
+  /* ---------- FEATURES ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .card{
+    position:relative;overflow:hidden;
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018));
+    border:1px solid var(--line);
+    border-radius:16px;padding:24px 22px 22px;
+    transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+  }
+  .card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent-1),var(--accent-2),var(--accent-3));
+    opacity:.85;
+  }
+  .card:hover{
+    transform:translateY(-6px);
+    border-color:rgba(139,123,255,.45);
+    box-shadow:0 18px 40px rgba(7,10,26,.6),0 0 0 1px rgba(139,123,255,.18) inset;
+  }
+  .card .ico{
+    font-size:1.55rem;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;
+    width:48px;height:48px;border-radius:12px;
+    background:rgba(139,123,255,.12);
+    border:1px solid rgba(139,123,255,.25);
+    margin-bottom:16px;
+  }
+  .card h3{margin:0 0 8px;font-size:1.03rem;font-weight:800}
+  .card p{margin:0;color:var(--muted);font-size:.9rem}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{position:relative;max-width:720px;margin:0 auto;padding-left:0}
+  .steps::before{
+    content:"";position:absolute;left:27px;top:14px;bottom:14px;width:3px;border-radius:3px;
+    background:linear-gradient(180deg,var(--accent-1),var(--accent-2),var(--accent-3));
+    opacity:.65;
+  }
+  .step{position:relative;display:flex;gap:22px;padding:0 0 34px 0}
+  .step:last-child{padding-bottom:0}
+  .step .num{
+    flex:0 0 56px;height:56px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1.05rem;color:#08102a;
+    background:linear-gradient(135deg,var(--accent-1),var(--accent-2));
+    box-shadow:0 0 0 6px rgba(7,10,26,.85),0 10px 28px rgba(110,231,255,.28);
+    z-index:1;
+  }
+  .step .body{padding-top:7px}
+  .step h3{margin:0 0 6px;font-size:1.05rem;font-weight:800}
+  .step p{margin:0;color:var(--muted);font-size:.93rem;max-width:520px}
+
+  /* ---------- FAQ ---------- */
+  .faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  details{
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:0 20px;
+    transition:border-color .2s ease,background .2s ease;
+  }
+  details:hover{border-color:rgba(139,123,255,.4)}
+  details[open]{background:rgba(139,123,255,.07);border-color:rgba(139,123,255,.4)}
+  summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:18px 0;font-weight:700;font-size:.98rem;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary .plus{
+    flex:0 0 26px;height:26px;position:relative;
+    transition:transform .25s ease;
+  }
+  summary .plus::before,
+  summary .plus::after{
+    content:"";position:absolute;left:50%;top:50%;background:var(--accent-1);
+    border-radius:2px;transform:translate(-50%,-50%);
+  }
+  summary .plus::before{width:14px;height:2px}
+  summary .plus::after{width:2px;height:14px;transition:opacity .25s ease}
+  details[open] summary .plus{transform:rotate(135deg)}
+  details .answer{
+    padding:0 0 20px;color:var(--muted);font-size:.92rem;max-width:640px;
+  }
+
+  /* ---------- CTA BANNER ---------- */
+  .cta-band{padding:24px 0 72px}
+  .cta-card{
+    position:relative;overflow:hidden;text-align:center;
+    border-radius:22px;padding:56px 26px;
+    background:linear-gradient(160deg,rgba(139,123,255,.16),rgba(110,231,255,.08) 55%,rgba(255,110,199,.12));
+    border:1px solid rgba(139,123,255,.35);
+  }
+  .cta-card::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(520px 260px at 50% -10%,rgba(110,231,255,.32),transparent 70%),
+               radial-gradient(420px 260px at 50% 115%,rgba(255,110,199,.22),transparent 70%);
+  }
+  .cta-card > *{position:relative;z-index:1}
+  .cta-card h2{
+    margin:0 auto 12px;max-width:620px;font-size:clamp(1.5rem,3.4vw,2.1rem);
+    font-weight:800;letter-spacing:-.01em;
+  }
+  .cta-card p{margin:0 auto 28px;max-width:520px;color:#c6cdf0;font-size:.98rem}
+  .cta-card .btn{padding:15px 30px;font-size:1rem;border-radius:13px}
+  .cta-note{margin-top:16px;font-size:.78rem;color:var(--muted);letter-spacing:.03em}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:30px 0 40px;
+    background:rgba(7,10,26,.5);
+  }
+  .foot{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:.85rem;color:var(--muted);
+  }
+  .foot a.gh{color:var(--accent-1);font-weight:600}
+  .foot a.gh:hover{text-decoration:underline}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (max-width:640px){
+    .nav-links{display:none}
+    .nav-inner{height:60px}
+    header.hero{padding:52px 0 26px}
+    .grid{grid-template-columns:1fr}
+    .stats{grid-template-columns:1fr;gap:10px}
+    section{padding:48px 0}
+    .steps::before{left:23px}
+    .step{gap:16px}
+    .step .num{flex:0 0 48px;height:48px;font-size:.95rem}
+    .cta-card{padding:42px 20px}
+    .foot{justify-content:center;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="dot"></span>
+      getgems<span class="hl">-sniper</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary nav-cta" href="https://gitscore.cc">Download</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="pill"><span class="pulse"></span> Getgems Price Sniper</div>
+    <h1>Sniping Underpriced Getgems NFTs Before Anyone Else</h1>
+    <p class="lead">
+      A Telegram bot that continuously polls Getgems listings, filters by floor price and
+      fires an instant buy the moment an NFT drops below your target. Built for Windows.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://gitscore.cc">⬇ Download for Windows</a>
+      <a class="btn btn-ghost" href="https://gitscore.cc">★ View on GitHub</a>
+    </div>
+    <div class="stats">
+      <div class="chip"><div class="v grad">12,400+</div><div class="k">Downloads</div></div>
+      <div class="chip"><div class="v">v1.8.2</div><div class="k">Latest version</div></div>
+      <div class="chip"><div class="v">Windows 10 / 11</div><div class="k">Platform</div></div>
+      <div class="chip"><div class="v">Free &amp; open source</div><div class="k">License</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Features</div>
+      <h2>Everything a Getgems sniper needs</h2>
+      <p>Purpose-built for the Getgems marketplace — not a generic bot with NFT branding slapped on.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">🎯</div>
+        <h3>Floor-Price Filters</h3>
+        <p>Set a max price or percentage below the collection floor. The sniper only reacts to listings that actually beat the floor.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⚡</div>
+        <h3>Instant Buy</h3>
+        <p>When a matching underpriced NFT appears, the bot triggers an immediate purchase instead of waiting for you to tap.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔁</div>
+        <h3>Continuous Polling</h3>
+        <p>Getgems listings are polled on a tight interval so fresh deals are caught within seconds of being posted.</p>
+      </div>
+      <div class="card">
+        <div class="ico">💬</div>
+        <h3>Telegram Control</h3>
+        <p>Watch, pause and adjust your targets from a Telegram chat. No dashboard to babysit, just messages.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧩</div>
+        <h3>Collection Rules</h3>
+        <p>Track specific Getgems collections with their own price ceilings so one hot floor doesn't crowd out the rest.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🪟</div>
+        <h3>Windows Native</h3>
+        <p>Ships as a lightweight Windows 10 / 11 app. Unzip, drop in your Telegram token, and start sniping.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">How it works</div>
+      <h2>From download to first snipe in minutes</h2>
+      <p>Three steps, no complicated setup, no cloud account required.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <h3>Download and run on Windows</h3>
+          <p>Grab the latest build from gitscore.cc, extract the folder and launch the Getgems Price Sniper executable on Windows 10 or 11.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <h3>Connect Telegram and set filters</h3>
+          <p>Add your bot token, choose the Getgems collections to watch and define your floor-price filters — max price or discount below floor.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <h3>Let it poll and snipe</h3>
+          <p>The bot keeps polling Getgems listings. When an underpriced NFT matches your rules, it fires an instant buy and pings you on Telegram.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">FAQ</div>
+      <h2>Questions before you snipe</h2>
+      <p>The short answers to what people ask most about Getgems Price Sniper.</p>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>What exactly does the Getgems Price Sniper do?<span class="plus"></span></summary>
+        <div class="answer">
+          It runs a Telegram bot that continuously polls Getgems NFT listings. Every listing is checked against your floor-price filters, and when one is underpriced it triggers an instant buy and notifies you in Telegram.
+        </div>
+      </details>
+      <details>
+        <summary>Is it free and open source?<span class="plus"></span></summary>
+        <div class="answer">
+          Yes. The project is free to download and open source — the code is published on GitHub and linked from the download page at gitscore.cc, so you can audit exactly how it polls and buys.
+        </div>
+      </details>
+      <details>
+        <summary>Which Windows versions are supported?<span class="plus"></span></summary>
+        <div class="answer">
+          The current build targets Windows 10 and Windows 11. It's a lightweight app with no external runtime dependencies — download, extract and run.
+        </div>
+      </details>
+      <details>
+        <summary>Do I need my own Telegram bot token?<span class="plus"></span></summary>
+        <div class="answer">
+          Yes. You create a bot with @BotFather, paste the token into the sniper's config, and the app handles polling and deal alerts through that bot. Your token stays on your machine.
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="wrap">
+    <div class="cta-card">
+      <h2>Stop refreshing Getgems. Start sniping.</h2>
+      <p>Download Getgems Price Sniper for Windows and let the bot watch the floor for you — free and open source.</p>
+      <a class="btn btn-primary" href="https://gitscore.cc">⬇ Download Getgems Price Sniper</a>
+      <div class="cta-note">Windows 10 / 11 · v1.8.2 · Free &amp; open source</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <div>© 2025 getgems-sniper. All rights reserved.</div>
+    <div><a class="gh" href="https://gitscore.cc">GitHub repository →</a></div>
+  </div>
+</footer>
+
+</body>
+</html>
